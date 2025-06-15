@@ -221,7 +221,7 @@ const FLUX_KONTEXT_API_KEY = 'your-replicate-key';
 
 ## 📊 版本历史
 
-### v1.0.0 (2025-01-XX)
+### v1.0.0 (2025-06-15)
 - ✨ 初始版本发布
 - 🤖 集成4种AI模型
 - 📷 支持摄像头拍摄
