@@ -1,0 +1,64 @@
+{
+  "name": "lychee-avatar-generator",
+  "version": "1.0.0",
+  "description": "荔枝守卫虚拟形象生成",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build-mac": "electron-builder --mac",
+    "build-win": "electron-builder --win",
+    "build-win-portable": "electron-builder --win portable",
+    "dist": "npm run build"
+  },
+  "keywords": ["electron", "iGEM", "avatar", "AI", "lychee"],
+  "author": "HKUST(GZ) iGEM Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.5.0",
+    "@google/generative-ai": "^0.7.1"
+  },
+  "build": {
+    "appId": "com.igem.lychee-avatar",
+    "productName": "荔枝头像生成器",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "css/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "target": "dmg"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        },
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/logo.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
+  }
+}

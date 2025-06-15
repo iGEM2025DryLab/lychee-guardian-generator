@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>荔枝守卫虚拟形象生成 - iGEM</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="logo-section">
+                <img src="../assets/logo.png" alt="iGEM Logo" class="logo-img" style="height: 48px; width: auto;">
+                <div class="title-section">
+                    <h1>iGEM "荔枝守卫"虚拟形象生成</h1>
+                    <p class="subtitle">2025 HKUST(GZ) iGEM Team - Lychee Guardians</p>
+                </div>
+            </div>
+            <div class="header-buttons">
+                <button class="header-btn" onclick="showPromptSettings()" title="调整生成提示词">
+                    📝 提示词设置
+                </button>
+                <button class="header-btn" onclick="showPrivacyInfo()" title="隐私说明">
+                    🔒 隐私说明
+                </button>
+                <button class="header-btn" onclick="showSettings()" title="API设置">
+                    ⚙️ API设置
+                </button>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 上传区域 -->
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📷</div>
+                    <h2>上传你的自拍照或拍摄新照片</h2>
+                    <p>拖拽图片到这里，或者选择下方选项</p>
+                    <div class="upload-options">
+                        <button class="upload-btn" onclick="selectImage()">📁 选择图片</button>
+                        <button class="camera-btn" onclick="capturePhoto()">📸 拍摄照片</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 预览和生成区域 -->
+            <div class="process-section" id="processSection" style="display: none;">
+                <div class="image-preview">
+                    <div class="original-image">
+                        <h3>原图</h3>
+                        <img id="originalImage" src="" alt="原始图片">
+                    </div>
+                    <div class="generate-controls">
+                        <div class="arrow">→</div>
+                        <button class="generate-btn" id="generateBtn" onclick="generateAvatar()">
+                            <span class="btn-text">生成荔枝守卫</span>
+                            <span class="loading-spinner" style="display: none;">🔄</span>
+                        </button>
+                        <div class="current-model" id="currentModel">
+                            当前模型: Google Gemini 2.0 Flash
+                        </div>
+                        <div class="style-options">
+                            <label>
+                                <input type="radio" name="gender" value="male" checked>
+                                男性荔枝守卫
+                            </label>
+                            <label>
+                                <input type="radio" name="gender" value="female">
+                                女性荔枝守卫
+                            </label>
+                        </div>
+                    </div>
+                    <div class="generated-image">
+                        <h3>荔枝守卫</h3>
+                        <div class="result-placeholder" id="resultPlaceholder">
+                            等待生成...
+                        </div>
+                        <img id="generatedImage" src="" alt="生成的荔枝守卫" style="display: none;">
+                        <div class="result-actions" id="resultActions" style="display: none;">
+                            <button class="download-btn" id="downloadBtn" onclick="downloadImage()">
+                                📥 下载头像
+                            </button>
+                            <button class="reupload-btn" onclick="showReuploadOptions()">
+                                🔄 重新上传
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 提示词设置弹窗 -->
+        <div class="modal" id="promptSettingsModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>提示词设置</h2>
+                    <span class="close" onclick="hidePromptSettings()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="model-description">
+                        <h3>📚 Google Gemini 2.0 Flash 模型说明</h3>
+                        <p>Gemini 2.0 Flash 是 Google 最新的多模态AI模型，具有以下特点：</p>
+                        <ul>
+                            <li>🚀 超快响应速度，针对实时应用优化</li>
+                            <li>🎨 强大的图像理解和生成能力</li>
+                            <li>🔄 支持图像到图像的转换</li>
+                            <li>💡 更好的创意生成和风格融合</li>
+                            <li>📱 适用于移动和桌面应用</li>
+                        </ul>
+                    </div>
+                    <div class="prompt-config">
+                        <h3>荔枝守卫角色说明</h3>
+                        <div class="character-descriptions">
+                            <div class="character-desc">
+                                <h4>👑 男性荔枝守卫</h4>
+                                <p>18岁幻想骑士，荔枝精神守护者。拥有酒红到粉色渐变的凌乱发型和深红色眼睛。身穿优雅的幻想盔甲和东方长袍，主题像荔枝壳，配有多层斗篷。手持发光的弯曲叶刃。</p>
+                            </div>
+                            <div class="character-desc">
+                                <h4>🌸 女性荔枝守卫（荔枝酱）</h4>
+                                <p>18岁日式魔法少女，荔枝果实主题。拥有渐变粉色双马尾和半透明发梢。眼睛是有光环的红宝石色。身穿白红渐变紧身衣和精致花瓣状外袍。手持发光花形阳伞。</p>
+                            </div>
+                        </div>
+                        <p class="prompt-hint">💡 提示：系统会根据您选择的性别自动生成对应的荔枝守卫角色，并融入您的面部特征。</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="save-btn" onclick="hidePromptSettings()">我已了解</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 隐私说明弹窗 -->
+        <div class="modal" id="privacyModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🔒 隐私说明</h2>
+                    <span class="close" onclick="hidePrivacyInfo()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="privacy-content">
+                        <div class="privacy-section">
+                            <h3>📸 图片处理说明</h3>
+                            <ul>
+                                <li>✅ 您的自拍照片<strong>不会</strong>被本应用存储或保存</li>
+                                <li>🔄 图片仅在生成过程中临时使用</li>
+                                <li>🗑️ 处理完成后图片数据会自动清除</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="privacy-section">
+                            <h3>🌐 AI服务说明</h3>
+                            <ul>
+                                <li>📤 为了生成荔枝头像，您的自拍照会被发送至选定的AI服务</li>
+                                <li>🤖 AI服务使用您的图片进行处理生成新头像</li>
+                                <li>📋 请参考相应服务的隐私政策了解更多信息</li>
+                                <li>⚡ 处理过程通常在几秒到几分钟内完成</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="privacy-section">
+                            <h3>🛡️ 数据安全</h3>
+                            <ul>
+                                <li>🔐 所有数据传输都使用HTTPS加密</li>
+                                <li>💾 应用本身不保存任何个人图片</li>
+                                <li>🏠 生成的头像仅保存在您的本地设备</li>
+                                <li>❌ 我们无法访问或查看您的图片</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="privacy-notice">
+                            <p><strong>⚠️ 重要提醒：</strong>使用本应用即表示您同意将图片发送至选定的AI服务进行处理。如果您不同意，请不要上传个人照片。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="save-btn" onclick="hidePrivacyInfo()">我已了解</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 拍摄照片弹窗 -->
+        <div class="modal" id="cameraModal" style="display: none;">
+            <div class="modal-content camera-modal">
+                <div class="modal-header">
+                    <h2>📸 拍摄照片</h2>
+                    <span class="close" onclick="hideCamera()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="camera-container">
+                        <video id="cameraVideo" autoplay muted></video>
+                        <canvas id="cameraCanvas" style="display: none;"></canvas>
+                        <div class="camera-overlay">
+                            <div class="camera-guide">
+                                <p>请确保脸部清晰可见</p>
+                                <div class="face-frame"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="camera-status" id="cameraStatus">
+                        正在启动摄像头...
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="camera-capture-btn" id="captureBtn" onclick="takePicture()" disabled>
+                        📷 拍摄
+                    </button>
+                    <button class="cancel-btn" onclick="hideCamera()">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 重新上传选项弹窗 -->
+        <div class="modal" id="reuploadModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🔄 选择新的图片</h2>
+                    <span class="close" onclick="hideReuploadOptions()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="reupload-options">
+                        <div class="reupload-option" onclick="selectNewImage()">
+                            <div class="option-icon">📁</div>
+                            <h3>选择新图片</h3>
+                            <p>从设备中选择一张新的自拍照片</p>
+                        </div>
+                        <div class="reupload-option" onclick="captureNewPhoto()">
+                            <div class="option-icon">📸</div>
+                            <h3>重新拍摄</h3>
+                            <p>使用摄像头拍摄一张新的照片</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API设置弹窗 -->
+        <div class="modal" id="settingsModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>API 设置</h2>
+                    <span class="close" onclick="hideSettings()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="api-selection">
+                        <h3>选择AI服务</h3>
+                        <div class="api-options">
+                            <label>
+                                <input type="radio" name="apiProvider" value="gemini" checked>
+                                Google Gemini 2.0 Flash
+                            </label>
+                            <label>
+                                <input type="radio" name="apiProvider" value="flux">
+                                Together.ai FLUX 1.1 Pro
+                            </label>
+                            <label>
+                                <input type="radio" name="apiProvider" value="segmind">
+                                Segmind PixelFlow
+                            </label>
+                            <label>
+                                <input type="radio" name="apiProvider" value="flux-kontext">
+                                FLUX Kontext Pro
+                            </label>
+                        </div>
+                    </div>
+                    <div class="api-config">
+                        <div class="selection-notice">
+                            <p>📌 <strong>注意：</strong>选择模型后需要点击"确认使用"按钮来保存设置</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" onclick="hideSettings()">取消</button>
+                    <button class="save-btn" onclick="saveSettings()">确认使用</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态提示 -->
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script src="../config/api-keys.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>
