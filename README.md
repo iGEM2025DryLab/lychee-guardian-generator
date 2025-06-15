@@ -6,22 +6,10 @@
 
 ![iGEM Logo](assets/logo.png)
 
-## ✨ 功能特点
-
-- 🎨 **AI驱动的图像生成**：使用多种先进的AI模型生成高质量的虚拟形象
-- 📷 **多种输入方式**：支持图片上传和实时摄像头拍摄
-- 🔄 **重新上传功能**：生成后可快速更换照片重新生成
-- ⚡ **多API支持**：集成4种不同的AI服务提供商
-- 🎭 **性别选择**：支持男性和女性荔枝守卫角色生成
-- 💾 **高质量下载**：支持多种格式的图片保存
-- 🔒 **隐私保护**：本地处理，不存储用户照片
-
 ## 🤖 支持的AI模型
 
-1. **Google Gemini 2.0 Flash** - 先进的多模态AI模型
-2. **Together.ai FLUX 1.1 Pro** - 专业级图像生成
-3. **Segmind PixelFlow** - 高效的图像处理
-4. **FLUX Kontext Pro** - 基于Replicate的文本驱动图像编辑
+1. **Google Gemini 2.0 Flash**
+2. **FLUX Kontext Pro**
 
 ## 🚀 快速开始
 
@@ -204,20 +192,6 @@ const FLUX_KONTEXT_API_KEY = 'your-replicate-key';
 ## 📄 许可证
 
 本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 👥 团队
-
-**2025 HKUST(GZ) iGEM Team - Lychee Guardians**
-
-- 项目维护者：[团队成员姓名]
-- 技术支持：[联系邮箱]
-- 官方网站：[团队网站]
-
-## 🙏 致谢
-
-- 感谢所有AI服务提供商的技术支持
-- 感谢开源社区的贡献
-- 特别感谢iGEM组织的支持
 
 ## 📊 版本历史
 
