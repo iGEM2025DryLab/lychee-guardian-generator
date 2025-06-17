@@ -5,6 +5,8 @@ const path = require('path');
 // 全局变量
 let currentImageData = null;
 let lycheeLogoData = null;
+let maleReferenceData = null;
+let femaleReferenceData = null;
 
 // API密钥 - 从外部配置文件加载
 const GEMINI_API_KEY = window.API_CONFIG?.GOOGLE_API_KEY || '';
@@ -16,6 +18,7 @@ const FLUX_KONTEXT_API_KEY = window.API_CONFIG?.FLUX_KONTEXT_API_KEY || '';
 document.addEventListener('DOMContentLoaded', () => {
     setupDragAndDrop();
     loadLycheeLogoFromFile();
+    loadReferenceImages();
     updateCurrentModelDisplay();
 });
 
@@ -58,13 +61,39 @@ async function loadLycheeLogoFromFile() {
         console.error('加载荔枝Logo失败:', error);
     }
 }
+
+// 加载参考图像
+async function loadReferenceImages() {
+    try {
+        const malePath = path.join(__dirname, '../assets/male.jpg');
+        const femalePath = path.join(__dirname, '../assets/female.jpg');
+        
+        if (fs.existsSync(malePath)) {
+            const maleBuffer = fs.readFileSync(malePath);
+            maleReferenceData = maleBuffer.toString('base64');
+            console.log('男性参考图像加载成功');
+        } else {
+            console.warn('男性参考图像文件不存在:', malePath);
+        }
+        
+        if (fs.existsSync(femalePath)) {
+            const femaleBuffer = fs.readFileSync(femalePath);
+            femaleReferenceData = femaleBuffer.toString('base64');
+            console.log('女性参考图像加载成功');
+        } else {
+            console.warn('女性参考图像文件不存在:', femalePath);
+        }
+    } catch (error) {
+        console.error('加载参考图像失败:', error);
+    }
+}
 async function callGeminiImageGeneration(imageBase64, gender, retryCount = 0) {
     const maxRetries = 3;
     try {
         // 获取性别对应的荔枝守卫提示词
         const genderPrompt = getGenderPrompt(gender);
         
-        const prompt = `Based on the user's selfie photo, create a lychee guardian character with the user's facial features. ${genderPrompt} Please incorporate the user's face and facial characteristics into this character design while maintaining the fantasy theme.`;
+        const prompt = `Based on the user's selfie photo, create a lychee guardian character with the user's facial features. ${genderPrompt} Use the reference image as a style guide for the character design. Please incorporate the user's face and facial characteristics into this character design while maintaining the fantasy theme and following the visual style shown in the reference image.`;
 
         if (retryCount === 0) {
             showToast('正在使用Gemini生成荔枝守卫...', 'info');
@@ -72,17 +101,33 @@ async function callGeminiImageGeneration(imageBase64, gender, retryCount = 0) {
             showToast(`网络重试中... (${retryCount}/${maxRetries})`, 'info');
         }
 
+        // 根据性别选择对应的参考图像
+        const referenceData = gender === 'male' ? maleReferenceData : femaleReferenceData;
+        
+        // 构建请求内容，包含用户图像和参考图像
+        const parts = [
+            { text: prompt },
+            {
+                inline_data: {
+                    mime_type: "image/jpeg",
+                    data: imageBase64
+                }
+            }
+        ];
+
+        // 添加参考图像（如果已加载）
+        if (referenceData) {
+            parts.push({
+                inline_data: {
+                    mime_type: "image/jpeg",
+                    data: referenceData
+                }
+            });
+        }
+
         const requestBody = {
             contents: [{
-                parts: [
-                    { text: prompt },
-                    {
-                        inline_data: {
-                            mime_type: "image/jpeg",
-                            data: imageBase64
-                        }
-                    }
-                ]
+                parts: parts
             }],
             generationConfig: {
                 temperature: 0.8,
@@ -830,13 +875,37 @@ async function capturePhoto() {
     cameraStatus.textContent = '正在启动摄像头...';
     
     try {
+        // 首先尝试枚举设备，优先选择内置摄像头
+        let videoConstraints = { 
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        };
+
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            console.log('可用摄像头设备:', videoDevices.map(d => ({ label: d.label, deviceId: d.deviceId })));
+            
+            // 优先选择包含"Built-in"、"Internal"、"FaceTime"等关键词的内置摄像头
+            const builtInCamera = videoDevices.find(device => 
+                device.label.toLowerCase().includes('built') ||
+                device.label.toLowerCase().includes('internal') ||
+                device.label.toLowerCase().includes('facetime') ||
+                device.label.toLowerCase().includes('integrated')
+            );
+
+            if (builtInCamera) {
+                videoConstraints.deviceId = { exact: builtInCamera.deviceId };
+                console.log('选择内置摄像头:', builtInCamera.label);
+            }
+        } catch (enumError) {
+            console.log('设备枚举失败，使用默认摄像头:', enumError);
+        }
+
         // 请求摄像头权限
         cameraStream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                facingMode: 'user' // 前置摄像头
-            } 
+            video: videoConstraints
         });
         
         video.srcObject = cameraStream;
